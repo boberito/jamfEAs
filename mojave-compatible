@@ -1,13 +1,5 @@
 #!/bin/sh
 
-##################################################################
-#: Date Created  : (July 30, 2018)
-#: Author        : Bob Gendler
-#: Email         : robert.gendler@nist.gov
-#: Organization  : OISM
-#: Version       : 1.0
-##################################################################
-
 #Determine if there's enough free space.
 determine_space () {
 	storage_available=$(df -h / | tail -n 1 | awk '{ print $4 }' | sed "s/[^0-9]//g" | bc)
@@ -104,4 +96,5 @@ elif [ "${Model}" = "MacPro" ]; then
 else
 	echo "<result>Mac Model cannot be determined"
 fi
+
 echo "</result>"

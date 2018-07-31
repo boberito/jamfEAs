@@ -1,0 +1,83 @@
+#!/bin/sh
+
+determine_space () {
+	storage_available=$(df -h / | tail -n 1 | awk '{ print $4 }' | sed "s/[^0-9]//g" | bc)
+	if [ $storage_available -le 15 ]; then
+		echo "<result>Need More space!<result>"
+	fi
+}
+check_ram () {
+	installed_ram=$(expr $(sysctl hw.memsize | awk -F ": " '{print $2}') / 1024 / 1024 / 1024 )
+	if [ $installed_ram -le 4 ]; then
+		echo "<result>Need More RAM!<result>"
+	fi
+}
+
+mainID=$(sysctl hw.model | awk -F '[^0-9]*' '{ print $2 }')
+secondaryID=$(sysctl hw.model | awk -F '[^0-9]*' '{ print $3 }')
+Model=$(sysctl hw.model | awk -F ': ' '{ print $2 }' | sed 's/[[:digit:][:punct:]]*//g')
+
+if [ "${Model}" = "MacBookAir" ]; then
+	if [ ${mainID} -gt 4 ]; then
+		echo "<result>Mojave Compatible<result>"
+		determine_space
+		check_ram
+	else
+		echo "<result>Not Compatible</result>"
+	fi
+elif [ "${Model}" = "MacBookPro" ]; then
+	if [ ${mainID} -gt 8 ]; then
+		echo "<result>Mojave Compatible</result>"
+		determine_space
+		check_ram
+	else
+		echo "<result>Not Compatible</result>"
+	fi
+elif [ "${Model}" = "MacBook" ]; then
+	if [ ${mainID} -gt 7 ]; then
+		echo "<result>Mojave Compatible</result>"
+		determine_space
+		check_ram
+	else
+		echo "<result>Not Compatible</result>"
+	fi
+elif [ "${Model}" = "iMac" ]; then
+	if [ ${mainID} -gt 12 ]; then
+		echo "<result>Mojave Compatible</result>"
+		determine_space
+		check_ram
+	else
+		echo "<result>Not Compatible</result>"
+	fi
+elif [ "${Model}" = "iMacPro" ]; then
+	if [ ${mainID} -gt 0 ]; then
+		echo "<result>Mojave Compatible</result>"
+		determine_space
+		check_ram
+	else
+		echo "<result>Not Compatible</result>"
+	fi
+elif [ "${Model}" = "Macmini" ]; then
+	if [ ${mainID} -gt 5 ]; then
+		echo "<result>Mojave Compatible</result>"
+		determine_space
+		check_ram
+	else
+		echo "<result>Not Compatible</result>"
+	fi
+elif [ "${Model}" = "MacPro" ]; then
+	if [ ${mainID} -gt 4 ]; then
+		system_profiler SPDisplaysDataType | awk '/Chipset Model/,/Displays/{print}' | sed '$d;s/^ *//g' | grep "Metal: " > /dev/null
+		if [ $? = 0 ]; then
+			echo "<result>Mojave Compatible</result>"
+			determine_space
+			check_ram
+		else
+			echo "<result>Not Compatible due to Video Card not supported</result>"
+		fi
+	else
+		echo "<result>Not Compatible</result>"
+	fi
+else
+	echo "<resultMac Model cannot be determined</result>"
+fi

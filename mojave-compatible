@@ -2,7 +2,7 @@
 
 determine_space () {
 	storage_available=$(df -h / | tail -n 1 | awk '{ print $4 }' | sed "s/[^0-9]//g" | bc)
-	if [ $storage_available -le 15 ]; then
+	if [ $storage_available -lt 15 ]; then
 		echo "<result>Need More space!<result>"
 	fi
 }

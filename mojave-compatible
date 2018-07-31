@@ -1,93 +1,107 @@
 #!/bin/sh
 
+##################################################################
+#: Date Created  : (July 30, 2018)
+#: Author        : Bob Gendler
+#: Email         : robert.gendler@nist.gov
+#: Organization  : OISM
+#: Version       : 1.0
+##################################################################
+
+#Determine if there's enough free space.
 determine_space () {
 	storage_available=$(df -h / | tail -n 1 | awk '{ print $4 }' | sed "s/[^0-9]//g" | bc)
 	if [ $storage_available -lt 20 ]; then
-		echo "<result>Failed: Insufficent drive space. Need 20GB to install, found ${storage_available}GB available</result>"
+		echo "Failed: Insufficent drive space. Need 20GB to install, found ${storage_available}GB available"
 	fi
 }
+
+#Determine RAM
 check_ram () {
 	RAMREQ=4
-
-	# Determine installed RAM
-	RAMInstalled=$(sysctl hw.memsize | awk '{ print $2 }')
+	RAMInstalled=$(expr $(sysctl hw.memsize | awk -F ": " '{print $2}') / 1024 / 1024 / 1024 )
 
 	if [ $RAMREQ -ge "$RAMInstalled" ]; then
-		echo "<result>Failed: Insufficent RAM. Need $RAMREQ GB to install, found $RAMInstalled GB installed</result>"
+		echo "Failed: Insufficent RAM. Need $RAMREQ GB to install, found $RAMInstalled GB installed"
 	fi
 }
 
+#Deteremine Mac Model, example MacPro6,1
 mainID=$(sysctl hw.model | awk -F '[^0-9]*' '{ print $2 }')
 secondaryID=$(sysctl hw.model | awk -F '[^0-9]*' '{ print $3 }')
 Model=$(sysctl hw.model | awk -F ': ' '{ print $2 }' | sed 's/[[:digit:][:punct:]]*//g')
 
+#If Mojave is already installed
 OS=`/usr/bin/sw_vers | grep ProductVersion | cut -c 17-21`
 if [ $OS = "10.14" ]; then
-	echo "<result>10.14 currently installed</result>"
+	echo "<result>10.14 currently installed"
 	exit 0
 fi
 
+#Check to see if the Mac Model is compatible
 if [ "${Model}" = "MacBookAir" ]; then
 	if [ ${mainID} -gt 4 ]; then
-		echo "<result>Mojave Compatible<result>"
+		echo "<result>Mojave Compatible"
 		determine_space
 		check_ram
 	else
-		echo "<result>Not Compatible</result>"
+		echo "<result>Not Compatible"
 	fi
 elif [ "${Model}" = "MacBookPro" ]; then
 	if [ ${mainID} -gt 8 ]; then
-		echo "<result>Mojave Compatible</result>"
+		echo "<result>Mojave Compatible"
 		determine_space
 		check_ram
 	else
-		echo "<result>Not Compatible</result>"
+		echo "<result>Not Compatible"
 	fi
 elif [ "${Model}" = "MacBook" ]; then
 	if [ ${mainID} -gt 7 ]; then
-		echo "<result>Mojave Compatible</result>"
+		echo "<result>Mojave Compatible"
 		determine_space
 		check_ram
 	else
-		echo "<result>Not Compatible</result>"
+		echo "<result>Not Compatible"
 	fi
 elif [ "${Model}" = "iMac" ]; then
 	if [ ${mainID} -gt 12 ]; then
-		echo "<result>Mojave Compatible</result>"
+		echo "<result>Mojave Compatible"
 		determine_space
 		check_ram
 	else
-		echo "<result>Not Compatible</result>"
+		echo "<result>Not Compatible"
 	fi
 elif [ "${Model}" = "iMacPro" ]; then
 	if [ ${mainID} -gt 0 ]; then
-		echo "<result>Mojave Compatible</result>"
+		echo "<result>Mojave Compatible"
 		determine_space
 		check_ram
 	else
-		echo "<result>Not Compatible</result>"
+		echo "<result>Not Compatible"
 	fi
 elif [ "${Model}" = "Macmini" ]; then
 	if [ ${mainID} -gt 5 ]; then
-		echo "<result>Mojave Compatible</result>"
+		echo "<result>Mojave Compatible"
 		determine_space
 		check_ram
 	else
-		echo "<result>Not Compatible</result>"
+		echo "<result>Not Compatible"
 	fi
 elif [ "${Model}" = "MacPro" ]; then
 	if [ ${mainID} -gt 4 ]; then
+	#Some MacPros due to graphic card issues are not compatible. This "SHOULD" determine that
 		system_profiler SPDisplaysDataType | awk '/Chipset Model/,/Displays/{print}' | sed '$d;s/^ *//g' | grep "Metal: " > /dev/null
 		if [ $? = 0 ]; then
-			echo "<result>Mojave Compatible</result>"
+			echo "<result>Mojave Compatible"
 			determine_space
 			check_ram
 		else
-			echo "<result>Not Compatible due to Video Card not supported</result>"
+			echo "<result>Not Compatible due to Video Card not supported"
 		fi
 	else
-		echo "<result>Not Compatible</result>"
+		echo "<result>Not Compatible"
 	fi
 else
-	echo "<resultMac Model cannot be determined</result>"
+	echo "<result>Mac Model cannot be determined"
 fi
+echo "</result>"

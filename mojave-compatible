@@ -25,7 +25,7 @@ Model=$(sysctl hw.model | awk -F ': ' '{ print $2 }' | sed 's/[[:digit:][:punct:
 #If Mojave is already installed
 OS=`/usr/bin/sw_vers | grep ProductVersion | cut -c 17-21`
 if [ $OS = "10.14" ]; then
-	printf "<result>10.14 currently installed"
+	printf "<result>10.14 currently installed</result>"
 	exit 0
 fi
 

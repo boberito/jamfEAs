@@ -2,20 +2,30 @@
 
 determine_space () {
 	storage_available=$(df -h / | tail -n 1 | awk '{ print $4 }' | sed "s/[^0-9]//g" | bc)
-	if [ $storage_available -lt 15 ]; then
-		echo "<result>Need More space!<result>"
+	if [ $storage_available -lt 20 ]; then
+		echo "<result>Failed: Insufficent drive space. Need 20GB to install, found ${storage_available}GB available</result>"
 	fi
 }
 check_ram () {
-	installed_ram=$(expr $(sysctl hw.memsize | awk -F ": " '{print $2}') / 1024 / 1024 / 1024 )
-	if [ $installed_ram -le 4 ]; then
-		echo "<result>Need More RAM!<result>"
+	RAMREQ=4
+
+	# Determine installed RAM
+	RAMInstalled=$(sysctl hw.memsize | awk '{ print $2 }')
+
+	if [ $RAMREQ -ge "$RAMInstalled" ]; then
+		echo "<result>Failed: Insufficent RAM. Need $RAMREQ GB to install, found $RAMInstalled GB installed</result>"
 	fi
 }
 
 mainID=$(sysctl hw.model | awk -F '[^0-9]*' '{ print $2 }')
 secondaryID=$(sysctl hw.model | awk -F '[^0-9]*' '{ print $3 }')
 Model=$(sysctl hw.model | awk -F ': ' '{ print $2 }' | sed 's/[[:digit:][:punct:]]*//g')
+
+OS=`/usr/bin/sw_vers | grep ProductVersion | cut -c 17-21`
+if [ $OS = "10.14" ]; then
+	echo "<result>10.14 currently installed</result>"
+	exit 0
+fi
 
 if [ "${Model}" = "MacBookAir" ]; then
 	if [ ${mainID} -gt 4 ]; then

@@ -23,8 +23,8 @@ secondaryID=$(sysctl hw.model | awk -F '[^0-9]*' '{ print $3 }')
 Model=$(sysctl hw.model | awk -F ': ' '{ print $2 }' | sed 's/[[:digit:][:punct:]]*//g')
 
 #If Mojave is already installed
-OS=`/usr/bin/sw_vers | grep ProductVersion | cut -c 17-21`
-if [ $OS = "10.14" ]; then
+OS=$(sw_vers | grep ProductVersion | awk '{print $2}' | cut -d "." -f 2)
+if [ $OS = "14" ]; then
 	printf "<result>10.14 currently installed</result>"
 	exit 0
 fi
